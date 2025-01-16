@@ -10,22 +10,26 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Kodunuzu Checkout Edin
+      # 1. Checkout Code
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      # 2. Gradle ile Derleme (Testleri Skip Et)
+      # 2. Set Execute Permissions for gradlew
+      - name: Set Execute Permissions
+        run: chmod +x ./gradlew
+
+      # 3. Build Application (Skipping Tests)
       - name: Build Java Application
         run: ./gradlew clean build -x test
 
-      # 3. Docker Image'i Hazırlayın
-      - name: Prepare Docker Build
+      # 4. Docker Image Build
+      - name: Build Docker Image
         run: |
           cp build/libs/*.jar myapp.jar
           docker build -t myapp:latest .
           docker save myapp:latest > myapp.tar
 
-      # 4. Yerel Sunucuya Deploy Edin
+      # 5. Deploy to Server
       - name: Deploy to Local Server
         uses: appleboy/ssh-action@v0.1.5
         with:
