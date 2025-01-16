@@ -10,17 +10,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Reponuzu Klonlayın
+      # 1. Checkout the Code
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      # 2. Docker Image'ı Build Edin
+      # 2. Build Docker Image
       - name: Build Docker Image
         run: docker build -t myapp:latest .
 
-      # 3. Local Server'a SSH ile Bağlanıp Deploy Edin
+      # 3. Deploy to Local Server via SSH
       - name: Deploy to Local Server
-        uses: appleboy/ssh-action@v0.1.12
+        uses: appleboy/ssh-action@v0.1.5
         with:
           host: ${{ secrets.LOCAL_SERVER_IP }}
           username: ${{ secrets.LOCAL_SERVER_USER }}
