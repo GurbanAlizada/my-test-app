@@ -37,3 +37,4 @@ jobs:
             docker rm myapp || true
             docker load < /path/to/myapp.tar
             docker run -d --name myapp -p 8080:8080 myapp:latest
+
