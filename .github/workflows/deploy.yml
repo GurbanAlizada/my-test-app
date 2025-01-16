@@ -1,4 +1,4 @@
-name: Deploy to Local Server
+name: CI/CD Pipeline
 
 on:
   push:
@@ -6,19 +6,26 @@ on:
       - dev
 
 jobs:
-  deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout the Code
+      # 1. Kodunuzu Checkout Edin
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      # 2. Build Docker Image
-      - name: Build Docker Image
-        run: docker build -t myapp:latest .
+      # 2. Gradle ile Derleme
+      - name: Build Java Application
+        run: ./gradlew clean build -x test
 
-      # 3. Deploy to Local Server via SSH
+      # 3. Docker Image'i Hazırlayın
+      - name: Prepare Docker Build
+        run: |
+          cp build/libs/*.jar myapp.jar
+          docker build -t myapp:latest .
+          docker save myapp:latest > myapp.tar
+
+      # 4. Yerel Sunucuya Deploy Edin
       - name: Deploy to Local Server
         uses: appleboy/ssh-action@v0.1.5
         with:
@@ -30,3 +37,4 @@ jobs:
             docker rm myapp || true
             docker load < /path/to/myapp.tar
             docker run -d --name myapp -p 8080:8080 myapp:latest
+
