@@ -1,0 +1,10 @@
+version: '3.8'
+services:
+  myapp:
+    image: myapp:latest
+    container_name: myapp
+    ports:
+      - "8080:8080"
+    volumes:
+      - /opt/myapp/logs:/app/logs
+    restart: always

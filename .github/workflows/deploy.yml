@@ -1,0 +1,39 @@
+name: Deploy Docker App to VPS
+
+on:
+  push:
+    branches:
+      - dev
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Reponuzu Klonlayın
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      # 2. Uygulamayı Build Edin
+      - name: Build Jar
+        run: mvn clean package
+
+      # 3. Docker Image'ı Oluşturun
+      - name: Build Docker Image
+        run: docker build -t myapp:latest .
+
+      # 4. Docker Image'ı VPS'ye Push Edin
+      - name: Push Docker Image to VPS
+        uses: appleboy/ssh-action@v0.1.12
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_PRIVATE_KEY }}
+          script: |
+            # Önceki Container'ı Durdurun ve Silin
+            docker stop myapp || true
+            docker rm myapp || true
+
+            # Yeni Docker Image'ı Çalıştırın
+            docker load < /path/to/myapp.tar
+            docker run -d --name myapp -p 8080:8080 myapp:latest
