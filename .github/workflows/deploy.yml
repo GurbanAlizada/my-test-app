@@ -31,7 +31,7 @@ jobs:
         run: |
           JAR_FILE=$(ls build/libs/*.jar)
           echo "Jar file: $JAR_FILE"
-          cp $JAR_FILE myapp.jar
+          cp "$JAR_FILE" ./myapp.jar
           docker build -t myapp:latest .
           docker save myapp:latest > myapp.tar
 
