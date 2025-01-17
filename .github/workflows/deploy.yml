@@ -40,8 +40,10 @@ jobs:
           key: ${{ secrets.LOCAL_SERVER_SSH_KEY }}
           source: myapp.tar
           target: /home/${{ secrets.LOCAL_SERVER_USER }}/myapp.tar
+          port: 22
+          
 
-      # 6. Deploy to Ubuntu Server
+          # 6. Deploy to Ubuntu Server
       - name: Deploy to Ubuntu Server
         uses: appleboy/ssh-action@v0.1.5
         with:
