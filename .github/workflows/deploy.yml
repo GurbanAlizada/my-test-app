@@ -22,11 +22,7 @@ jobs:
       - name: Build Java Application
         run: ./gradlew clean build -x test
 
-      # 4. Debug Build Directory
-      - name: Debug Build Directory
-        run: ls -R build/libs
-
-      # 5. Docker Image Build
+      # 4. Docker Image Build
       - name: Build Docker Image
         run: |
           JAR_FILE=$(find build/libs -name "*.jar" -type f | head -n 1)
@@ -35,15 +31,30 @@ jobs:
           docker build -t myapp:latest .
           docker save myapp:latest > myapp.tar
 
-      # 6. Deploy to Server
-      - name: Deploy to Local Server
+      # 5. Send Docker Image to Server
+      - name: Send Docker Image
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.LOCAL_SERVER_IP }}
+          username: ${{ secrets.LOCAL_SERVER_USER }}
+          key: ${{ secrets.LOCAL_SERVER_SSH_KEY }}
+          source: myapp.tar
+          target: /home/${{ secrets.LOCAL_SERVER_USER }}/myapp.tar
+
+      # 6. Deploy to Ubuntu Server
+      - name: Deploy to Ubuntu Server
         uses: appleboy/ssh-action@v0.1.5
         with:
           host: ${{ secrets.LOCAL_SERVER_IP }}
           username: ${{ secrets.LOCAL_SERVER_USER }}
           key: ${{ secrets.LOCAL_SERVER_SSH_KEY }}
           script: |
+            echo "Stopping and removing old container..."
             docker stop myapp || true
             docker rm myapp || true
-            docker load < /path/to/myapp.tar
+            
+            echo "Loading Docker image..."
+            docker load < /home/${{ secrets.LOCAL_SERVER_USER }}/myapp.tar
+            
+            echo "Running new container..."
             docker run -d --name myapp -p 8080:8080 myapp:latest
