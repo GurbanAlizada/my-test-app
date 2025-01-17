@@ -26,3 +26,10 @@ dependencies {
 tasks.named('test') {
     useJUnitPlatform()
 }
+
+
+
+jar {
+    archiveFileName = "myapp.jar"
+    destinationDirectory = file("$buildDir/libs")
+}

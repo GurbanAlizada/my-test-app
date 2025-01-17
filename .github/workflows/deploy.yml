@@ -22,14 +22,20 @@ jobs:
       - name: Build Java Application
         run: ./gradlew clean build -x test
 
-      # 4. Docker Image Build
+      # 4. Debug Build Directory
+      - name: Debug Build Directory
+        run: ls -R build/libs
+
+      # 5. Docker Image Build
       - name: Build Docker Image
         run: |
-          cp build/libs/*.jar myapp.jar
+          JAR_FILE=$(ls build/libs/*.jar)
+          echo "Jar file: $JAR_FILE"
+          cp $JAR_FILE myapp.jar
           docker build -t myapp:latest .
           docker save myapp:latest > myapp.tar
 
-      # 5. Deploy to Server
+      # 6. Deploy to Server
       - name: Deploy to Local Server
         uses: appleboy/ssh-action@v0.1.5
         with:
