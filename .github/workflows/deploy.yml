@@ -17,7 +17,7 @@ jobs:
       - name: Make Gradle Wrapper Executable
         run: chmod +x ./gradlew
 
-      # 3. JDK 17 Kurulumu
+      # 3. JDK 17 Kurulumu 
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
