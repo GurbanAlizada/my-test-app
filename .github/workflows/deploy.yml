@@ -6,30 +6,34 @@ on:
       - dev
 
 jobs:
-  build-and-deploy:
+  strategy:
+    name: Unit Test
     runs-on: ubuntu-latest
-
     steps:
-      # 1. Checkout Code
-      - name: Checkout Code
+      - name: Checkout code
         uses: actions/checkout@v3
 
-      # 2. Set Execute Permissions for gradlew
-      - name: Set Execute Permissions
-        run: chmod +x ./gradlew
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'corretto'
+          cache: 'gradle'
 
-      # 3. Build Application (Skipping Tests)
-      - name: Build Java Application
-        run: ./gradlew clean build -x test
+      - name: Cache Gradle Dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.gradle/caches
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
 
-      # 4. Docker Image Build
-      - name: Build Docker Image
-        run: |
-          JAR_FILE=$(find build/libs -name "*.jar" -type f | head -n 1)
-          echo "Jar file: $JAR_FILE"
-          cp "$JAR_FILE" ./myapp.jar
-          docker build -t myapp:latest .
-          docker save myapp:latest > myapp.tar
+      - name: Build with Gradle
+        run: ./gradlew build
+
+      - name: Run Tests
+        run: ./gradlew test
+
 
        # 4. Docker Hub'a Giriş Yapın
       - name: Log in to Docker Hub
