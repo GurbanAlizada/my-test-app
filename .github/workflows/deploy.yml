@@ -9,15 +9,12 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     steps:
-      # 1. Kodunuzu Klonlayın
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # 2. Gradle Wrapper'a Çalıştırma İzni Verin
       - name: Make Gradle Wrapper Executable
         run: chmod +x ./gradlew
 
-      # 3. JDK 17 Kurulumu 
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
@@ -25,24 +22,11 @@ jobs:
           distribution: 'corretto'
           cache: 'gradle'
 
-      # 4. Gradle Cache Kullanımı
-      - name: Cache Gradle Dependencies
-        uses: actions/cache@v3
-        with:
-          path: ~/.gradle/caches
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
-
-      # 5. Projeyi Derleyin
       - name: Build with Gradle
         run: ./gradlew build
 
-      # 6. Build Artifacts'ı Doğrulayın
       - name: Verify Build Artifacts
         run: ls -la build/libs
 
-      # 7. Docker Image'i Oluşturun
       - name: Build Docker Image
-        run: |
-          docker build -t myapp:latest .
+        run: docker build -t myapp:latest .
