@@ -43,14 +43,20 @@ jobs:
       - name: Run Tests
         run: ./gradlew test
 
-      # 7. Docker Hub'a Giriş Yapın
+      # 7. Docker Image'i Oluşturun
+      - name: Build Docker Image
+        run: |
+          docker build -t myapp:latest .
+          docker images  # Mevcut imajları listeleyin, loglarda kontrol etmek için
+
+      # 8. Docker Hub'a Giriş Yapın
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      # 8. Docker Image'ı Docker Hub'a Push Edin
+      # 9. Docker Image'i Docker Hub'a Push Edin
       - name: Push Docker Image to Docker Hub
         run: |
           docker tag myapp:latest ${{ secrets.DOCKER_USERNAME }}/myapp:latest
