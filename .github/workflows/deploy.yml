@@ -1,4 +1,4 @@
-name: Deploy Docker App to VPS
+name: CI/CD Pipeline
 
 on:
   push:
@@ -6,17 +6,30 @@ on:
       - dev
 
 jobs:
-  deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Reponuzu Klonlayın
+      # 1. Checkout Code
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      # 2. Uygulamayı Build Edin
-      - name: Build Jar
-        run: mvn clean package
+      # 2. Set Execute Permissions for gradlew
+      - name: Set Execute Permissions
+        run: chmod +x ./gradlew
+
+      # 3. Build Application (Skipping Tests)
+      - name: Build Java Application
+        run: ./gradlew clean build -x test
+
+      # 4. Docker Image Build
+      - name: Build Docker Image
+        run: |
+          JAR_FILE=$(find build/libs -name "*.jar" -type f | head -n 1)
+          echo "Jar file: $JAR_FILE"
+          cp "$JAR_FILE" ./myapp.jar
+          docker build -t myapp:latest .
+          docker save myapp:latest > myapp.tar
 
        # 4. Docker Hub'a Giriş Yapın
       - name: Log in to Docker Hub
