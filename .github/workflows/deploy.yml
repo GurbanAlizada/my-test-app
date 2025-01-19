@@ -10,9 +10,15 @@ jobs:
     name: Unit Test
     runs-on: ubuntu-latest
     steps:
+      # 1. Kodunuzu Klonlayın
       - name: Checkout code
         uses: actions/checkout@v3
 
+      # 2. Gradle Wrapper'a Çalıştırma İzni Verin
+      - name: Make Gradle Wrapper Executable
+        run: chmod +x ./gradlew
+
+      # 3. JDK 17 Kurulumu
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
@@ -20,6 +26,7 @@ jobs:
           distribution: 'corretto'
           cache: 'gradle'
 
+      # 4. Gradle Cache Kullanımı
       - name: Cache Gradle Dependencies
         uses: actions/cache@v3
         with:
@@ -28,21 +35,22 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
+      # 5. Projeyi Derleyin
       - name: Build with Gradle
         run: ./gradlew build
 
+      # 6. Testleri Çalıştırın
       - name: Run Tests
         run: ./gradlew test
 
-
-       # 4. Docker Hub'a Giriş Yapın
+      # 7. Docker Hub'a Giriş Yapın
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      # 5. Docker Image'ı Docker Hub'a Push Edin
+      # 8. Docker Image'ı Docker Hub'a Push Edin
       - name: Push Docker Image to Docker Hub
         run: |
           docker tag myapp:latest ${{ secrets.DOCKER_USERNAME }}/myapp:latest
