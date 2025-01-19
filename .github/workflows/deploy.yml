@@ -1,4 +1,4 @@
-name: CI/CD Pipeline
+name: Deploy Docker App to VPS
 
 on:
   push:
@@ -6,35 +6,27 @@ on:
       - dev
 
 jobs:
-  build-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Kodunuzu Checkout Edin
+      # 1. Reponuzu Klonlayın
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      # 2. Gradle ile Derleme
-      - name: Build Java Application
-        run: ./gradlew clean build -x test
+      # 2. Uygulamayı Build Edin
+      - name: Build Jar
+        run: mvn clean package
 
-      # 3. Docker Image'i Hazırlayın
-      - name: Prepare Docker Build
-        run: |
-          cp build/libs/*.jar myapp.jar
-          docker build -t myapp:latest .
-          docker save myapp:latest > myapp.tar
-
-      # 4. Yerel Sunucuya Deploy Edin
-      - name: Deploy to Local Server
-        uses: appleboy/ssh-action@v0.1.5
+       # 4. Docker Hub'a Giriş Yapın
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
         with:
-          host: ${{ secrets.LOCAL_SERVER_IP }}
-          username: ${{ secrets.LOCAL_SERVER_USER }}
-          key: ${{ secrets.LOCAL_SERVER_SSH_KEY }}
-          script: |
-            docker stop myapp || true
-            docker rm myapp || true
-            docker load < /path/to/myapp.tar
-            docker run -d --name myapp -p 8080:8080 myapp:latest
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
+      # 5. Docker Image'ı Docker Hub'a Push Edin
+      - name: Push Docker Image to Docker Hub
+        run: |
+          docker tag myapp:latest ${{ secrets.DOCKER_USERNAME }}/myapp:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/myapp:latest
